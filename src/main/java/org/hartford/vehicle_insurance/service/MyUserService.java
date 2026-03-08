@@ -35,9 +35,8 @@ public class MyUserService implements UserDetailsService {
     public MyUser register(MyUser myUser) {
         myUser.setId(null);
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
-        if (myUser.getRoles() == null) {
             myUser.setRoles("CUSTOMER");
-        }
+
         return myUserRepo.save(myUser);
     }
 
@@ -57,5 +56,13 @@ public class MyUserService implements UserDetailsService {
                 .password(mu.getPassword())
                 .roles(mu.getRoles())
                 .build();
+    }
+
+
+    public MyUser createClaimOfficer(MyUser myUser) {
+        myUser.setId(null);
+        myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
+        myUser.setRoles("CLAIM_OFFICER");
+        return myUserRepo.save(myUser);
     }
 }

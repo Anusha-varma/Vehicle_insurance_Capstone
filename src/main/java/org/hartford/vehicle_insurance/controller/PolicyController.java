@@ -22,7 +22,7 @@ public class PolicyController {
         return policyService.createPolicy(policy);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     @GetMapping("all")
     public List<Policy> getAllPolicies() {
         return policyService.getAllPolicies();
