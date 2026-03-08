@@ -1,5 +1,5 @@
 package org.hartford.vehicle_insurance.controller;
-
+import org.hartford.vehicle_insurance.dto.PolicyApplicationRequest;
 import org.hartford.vehicle_insurance.model.PolicySubscription;
 import org.hartford.vehicle_insurance.service.PolicySubscriptionService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,8 +18,19 @@ public class PolicySubscriptionController {
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("{policyId}/apply")
-    public PolicySubscription applyForPolicy(@PathVariable Long policyId, @RequestBody PolicySubscription policySubscription) {
-        return policySubscriptionService.applyPolicy(policyId,policySubscription);
+    public PolicySubscription applyForPolicy(
+            @PathVariable Long policyId,
+            @RequestBody PolicyApplicationRequest request) {
+
+        PolicySubscription subscription = new PolicySubscription();
+        subscription.setStartDate(request.getStartDate());
+        subscription.setEndDate(request.getEndDate());
+
+        return policySubscriptionService.applyPolicy(
+                policyId,
+                subscription,
+                request.getAddOnIds()
+        );
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
