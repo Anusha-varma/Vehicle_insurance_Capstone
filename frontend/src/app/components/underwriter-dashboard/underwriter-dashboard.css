@@ -1,0 +1,16 @@
+.underwriter-dashboard {
+  padding: 24px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+/* Remove th background to allow Tailwind classes to work */
+button {
+  margin-right: 8px;
+}

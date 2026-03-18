@@ -1,0 +1,442 @@
+
+<!-- Admin Dashboard -->
+<div class="bg-white min-h-screen pt-20">
+	<div class="max-w-6xl mx-auto px-6 py-12">
+		<!-- 1. Header -->
+		<div class="text-center mb-10">
+			<h1 class="text-4xl font-bold text-black tracking-tight">Admin <span class="text-[#C2185B]">Panel</span></h1>
+			<p class="text-gray-500 mt-3 text-lg">Manage policies, users, and system settings efficiently</p>
+		</div>
+
+		<!-- 2. STATS CARDS -->
+		<div class="grid md:grid-cols-5 gap-6 mb-12">
+			<div class="bg-white rounded-2xl shadow-sm hover:shadow-lg ring-1 ring-gray-100 p-8 border-t-4 border-t-[#C2185B] transition-all duration-300 transform hover:-translate-y-1">
+				<div class="flex items-center gap-4 mb-4">
+					<div class="bg-pink-100 p-3 rounded-full text-[#C2185B] flex items-center justify-center">
+						<span class="material-icons">description</span>
+					</div>
+					<p class="text-sm font-bold uppercase tracking-wider text-gray-500">Total Policies</p>
+				</div>
+				<p class="text-4xl font-bold text-black">{{ totalPolicies }}</p>
+			</div>
+
+			<div class="bg-white rounded-2xl shadow-sm hover:shadow-lg ring-1 ring-gray-100 p-8 border-t-4 border-t-[#C2185B] transition-all duration-300 transform hover:-translate-y-1">
+				<div class="flex items-center gap-4 mb-4">
+					<div class="bg-pink-100 p-3 rounded-full text-[#C2185B] flex items-center justify-center">
+						<span class="material-icons">people</span>
+					</div>
+					<p class="text-sm font-bold uppercase tracking-wider text-gray-500">Total Users</p>
+				</div>
+				<p class="text-4xl font-bold text-black">{{ totalUsers }}</p>
+			</div>
+
+			<div class="bg-white rounded-2xl shadow-sm hover:shadow-lg ring-1 ring-gray-100 p-8 border-t-4 border-t-[#C2185B] transition-all duration-300 transform hover:-translate-y-1">
+				<div class="flex items-center gap-4 mb-4">
+					<div class="bg-pink-100 p-3 rounded-full text-[#C2185B] flex items-center justify-center">
+						<span class="material-icons">pending_actions</span>
+					</div>
+					<p class="text-sm font-bold uppercase tracking-wider text-gray-500">Pending Approvals</p>
+				</div>
+				<p class="text-4xl font-bold text-[#C2185B]">{{ pendingApprovals }}</p>
+			</div>
+			<div class="bg-white rounded-2xl shadow-sm p-8 border-t-4 border-green-500">
+  <p class="text-sm uppercase text-gray-500">Total Revenue</p>
+  <p class="text-4xl font-bold text-black">₹{{ totalRevenue }}</p>
+</div>
+<div class="bg-white rounded-2xl shadow-sm p-8 border-t-4 border-purple-500">
+  <p class="text-sm uppercase text-gray-500">Underwriter Commission</p>
+  <p class="text-4xl font-bold text-black">₹{{ underwriterCommission }}</p>
+</div>
+<div class="bg-white rounded-2xl shadow-sm p-8 border-t-4 border-indigo-500">
+  <p class="text-sm uppercase text-gray-500">Claim Officer Commission</p>
+  <p class="text-4xl font-bold text-black">₹{{ claimOfficerCommission }}</p>
+</div>
+		</div>
+
+		<!-- 3. QUICK ACTIONS SECTION -->
+		<div class="bg-gray-50 rounded-2xl shadow-sm ring-1 ring-gray-100 p-8 mt-8 border-l-4 border-[#C2185B]">
+			<h2 class="text-xl font-bold mb-4 text-black">Quick Actions</h2>
+			<div class="flex gap-4 mt-4">
+				<button (click)="openCreatePolicyModal()"
+					class="bg-[#C2185B] flex items-center gap-2 text-white px-6 py-3 rounded-full hover:bg-black transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg">
+					<span class="material-icons text-sm">add_circle</span>
+					Create Policy
+				</button>
+				<button (click)="openCreateOfficerModal()"
+					class="bg-black flex items-center gap-2 text-white border border-transparent px-6 py-3 rounded-full hover:bg-[#C2185B] transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg">
+					<span class="material-icons text-sm">person_add</span>
+					Register Claim Officer
+				</button>
+				<button (click)="openCreateUnderwriterModal()"
+					class="bg-gray-700 flex items-center gap-2 text-white border border-transparent px-6 py-3 rounded-full hover:bg-[#C2185B] transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg">
+					<span class="material-icons text-sm">assignment_ind</span>
+					Register Underwriter
+				</button>
+			</div>
+		</div>
+
+		<!-- 4. MANAGE POLICIES SECTION -->
+		<div class="bg-white rounded-xl border border-gray-900 shadow-md p-8 mt-8">
+			<!-- Header Row -->
+			<div class="flex justify-between items-center mb-6">
+				<h2 class="text-xl font-bold text-black">Manage Policies</h2>
+				<div>
+					<input type="text" placeholder="Search policy..."
+						class="border border-gray-300 rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-[#C2185B]"
+						[(ngModel)]="searchTerm" (input)="onSearchChange()">
+				</div>
+			</div>
+
+			<!-- Policy List Table -->
+			<div class="mt-6 overflow-x-auto">
+				<table class="w-full text-left border-collapse">
+					<thead>
+						<tr class="text-xs uppercase text-gray-500 border-b border-gray-200">
+							<th class="py-3 px-4 font-semibold">Policy Name</th>
+							<th class="py-3 px-4 font-semibold">Vehicle Type</th>
+							<th class="py-3 px-4 font-semibold">Coverage Amount</th>
+							<th class="py-3 px-4 font-semibold">Base Premium</th>
+							<th class="py-3 px-4 font-semibold text-center">Actions</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-gray-100">
+						@for (policy of paginatedPolicies; track policy.id || policy.policyId) {
+						<tr class="hover:bg-gray-50 transition-colors duration-150">
+							<td class="py-4 px-4 font-semibold text-black">{{ policy.name || 'N/A' }}</td>
+							<td class="py-4 px-4 text-gray-600">{{ policy.vehicleType || 'N/A' }}</td>
+							<td class="py-4 px-4 text-[#C2185B] font-semibold">₹{{ policy.coverageAmount || '-' }}</td>
+							<td class="py-4 px-4 font-semibold text-black">₹{{ policy.basePremium || policy.premium ||
+								'-' }}</td>
+							<td class="py-4 px-4">
+								<div class="flex justify-center gap-3">
+									<button (click)="editPolicy(policy.id || policy.policyId)"
+										class="text-blue-600 hover:text-blue-800 transition-colors" title="Edit">
+										<!-- Heroicons pencil-square -->
+										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+											stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+											<path stroke-linecap="round" stroke-linejoin="round"
+												d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L5.314 19.314l1.13-3.376a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+										</svg>
+									</button>
+									<button (click)="deletePolicy(policy.id || policy.policyId)"
+										class="text-red-600 hover:text-red-800 transition-colors" title="Delete">
+										<!-- Heroicons trash -->
+										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+											stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+											<path stroke-linecap="round" stroke-linejoin="round"
+												d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+										</svg>
+									</button>
+								</div>
+							</td>
+						</tr>
+						}
+					</tbody>
+				</table>
+
+				@if (filteredPolicies.length === 0) {
+				<div class="text-center py-8 text-gray-500">
+					No policies found.
+				</div>
+				}
+			</div>
+
+			<!-- Pagination Controls -->
+			@if (filteredPolicies.length > itemsPerPage) {
+			<div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+				<div class="text-sm text-gray-500">
+					Showing <span class="font-medium text-black">{{ currentShowingStart }}</span> to 
+					<span class="font-medium text-black">{{ currentShowingEnd }}</span> of 
+					<span class="font-medium text-black">{{ filteredPolicies.length }}</span> policies
+				</div>
+				<div class="flex items-center gap-2">
+					<button (click)="prevPage()" [disabled]="currentPage === 1"
+						class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-[#C2185B] hover:text-white disabled:opacity-50 disabled:hover:bg-gray-100 disabled:hover:text-gray-600 transition-colors font-semibold text-sm">
+						Previous
+					</button>
+					<span class="text-sm font-semibold text-black px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+						Page {{ currentPage }} of {{ totalPages }}
+					</span>
+					<button (click)="nextPage()" [disabled]="currentPage === totalPages"
+						class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-[#C2185B] hover:text-white disabled:opacity-50 disabled:hover:bg-gray-100 disabled:hover:text-gray-600 transition-colors font-semibold text-sm">
+						Next
+					</button>
+				</div>
+			</div>
+			}
+		</div>
+
+
+
+	</div>
+
+	<!-- 5. EDIT POLICY MODAL -->
+	@if (isEditModalOpen && editingPolicy) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+		<div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all">
+			
+			<!-- Modal Header -->
+			<div class="bg-[#C2185B] px-6 py-4 flex justify-between items-center text-white">
+				<h3 class="text-xl font-bold">Edit Policy</h3>
+				<button (click)="closeEditModal()" class="text-white hover:text-gray-200 transition-colors">
+					<span class="material-icons">close</span>
+				</button>
+			</div>
+
+			<!-- Modal Body (Form) -->
+			<div class="p-6">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<!-- Policy Name -->
+					<div class="col-span-1 md:col-span-2">
+						<label class="block text-sm font-semibold text-gray-700 mb-1">Policy Name</label>
+						<input type="text" [(ngModel)]="editingPolicy.name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+					</div>
+					
+					<!-- Vehicle Type -->
+					<div>
+						<label class="block text-sm font-semibold text-gray-700 mb-1">Vehicle Type</label>
+						<select [(ngModel)]="editingPolicy.vehicleType" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all cursor-pointer">
+							<option value="CAR">CAR</option>
+							<option value="BIKE">BIKE</option>
+							<option value="ALL">ALL</option>
+						</select>
+					</div>
+
+					<!-- Coverage Amount -->
+					<div>
+						<label class="block text-sm font-semibold text-gray-700 mb-1">Coverage Amount (₹)</label>
+						<input type="number" [(ngModel)]="editingPolicy.coverageAmount" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+					</div>
+
+					<!-- Base Premium -->
+					<div>
+						<label class="block text-sm font-semibold text-gray-700 mb-1">Base Premium (₹)</label>
+						<input type="number" [(ngModel)]="editingPolicy.basePremium" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+					</div>
+
+					<!-- Description -->
+					<div class="col-span-1 md:col-span-2">
+						<label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+						<textarea [(ngModel)]="editingPolicy.description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all resize-none"></textarea>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal Footer -->
+			<div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+				<button (click)="closeEditModal()" class="px-5 py-2 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
+					Cancel
+				</button>
+				<button (click)="saveEditedPolicy()" class="px-5 py-2 rounded-lg font-semibold text-white bg-[#C2185B] hover:bg-[#A3154D] shadow-md transition-colors">
+					Save Changes
+				</button>
+			</div>
+			
+		</div>
+	</div>
+	}
+
+	<!-- 6. CREATE POLICY MODAL -->
+	@if (isCreatePolicyModalOpen) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+		<div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all">
+			
+			<div class="bg-black border-l-4 border-[#C2185B] px-6 py-4 flex justify-between items-center text-white">
+				<h3 class="text-xl font-bold">Create Policy</h3>
+				<button (click)="closeCreatePolicyModal()" class="text-gray-400 hover:text-white transition-colors">
+					<span class="material-icons">close</span>
+				</button>
+			</div>
+
+			<form [formGroup]="createPolicyForm" (ngSubmit)="submitCreatePolicy()">
+				<div class="p-6 h-[60vh] overflow-y-auto">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+						<div class="col-span-1 md:col-span-2">
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Policy Name</label>
+							<input type="text" formControlName="name" placeholder="e.g. Comprehensive Auto" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+						</div>
+						
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Policy Type</label>
+							<input type="text" formControlName="policyType" placeholder="e.g. Comprehensive" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+						</div>
+
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Vehicle Type</label>
+							<select formControlName="vehicleType" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all cursor-pointer bg-white">
+								<option value="">Select Type</option>
+								<option value="CAR">CAR</option>
+								<option value="BIKE">BIKE</option>
+								<option value="ALL">ALL</option>
+							</select>
+						</div>
+
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Coverage Amount (₹)</label>
+							<input type="number" formControlName="coverageAmount" placeholder="e.g. 500000" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+						</div>
+
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Base Premium (₹)</label>
+							<input type="number" formControlName="basePremium" placeholder="e.g. 15000" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+						</div>
+
+						<div class="col-span-1 md:col-span-2">
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+							<textarea formControlName="description" rows="3" placeholder="Policy details..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all resize-none"></textarea>
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+					<button type="button" (click)="closeCreatePolicyModal()" class="px-5 py-2 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
+						Cancel
+					</button>
+					<button type="submit" [disabled]="creatingPolicy" class="px-5 py-2 rounded-lg font-semibold text-white bg-[#C2185B] hover:bg-[#A3154D] shadow-md transition-colors disabled:opacity-50">
+						{{ creatingPolicy ? 'Creating...' : 'Create Policy' }}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	}
+
+	<!-- 7. CREATE CLAIM OFFICER MODAL -->
+	@if (isCreateOfficerModalOpen) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+		<div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+			
+			<div class="bg-black border-l-4 border-[#C2185B] px-6 py-4 flex justify-between items-center text-white">
+				<h3 class="text-xl font-bold">Create Claim Officer</h3>
+				<button (click)="closeCreateOfficerModal()" class="text-gray-400 hover:text-white transition-colors">
+					<span class="material-icons">close</span>
+				</button>
+			</div>
+
+			<form [formGroup]="createOfficerForm" (ngSubmit)="submitCreateOfficer()">
+				<div class="p-6">
+					
+					@if (officerCreatedUsername) {
+					<div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm text-center">
+						<span class="font-bold">Success!</span> Officer <span class="font-bold">{{ officerCreatedUsername }}</span> created.
+					</div>
+					}
+					
+					@if (officerError) {
+					<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm text-center">
+						{{ officerError }}
+					</div>
+					}
+
+					<div class="space-y-4">
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+							<div class="relative">
+								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<span class="material-icons text-gray-400 text-sm">person</span>
+								</div>
+								<input type="text" formControlName="username" class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+							</div>
+							@if (createOfficerForm.get('username')?.invalid && createOfficerForm.get('username')?.touched) {
+								<span class="text-red-500 text-xs mt-1 block">Username is required (min 3 chars).</span>
+							}
+						</div>
+						
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+							<div class="relative">
+								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<span class="material-icons text-gray-400 text-sm">lock</span>
+								</div>
+								<input type="password" formControlName="password" class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+							</div>
+							@if (createOfficerForm.get('password')?.invalid && createOfficerForm.get('password')?.touched) {
+								<span class="text-red-500 text-xs mt-1 block">Password is required (min 6 chars).</span>
+							}
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+					<button type="button" (click)="closeCreateOfficerModal()" class="px-5 py-2 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
+						Close
+					</button>
+					<button type="submit" [disabled]="creatingOfficer" class="px-5 py-2 rounded-lg font-semibold text-white bg-[#C2185B] hover:bg-[#A3154D] shadow-md transition-colors disabled:opacity-50">
+						{{ creatingOfficer ? 'Creating...' : 'Create Officer' }}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	}
+
+	<!-- 8. CREATE UNDERWRITER MODAL -->
+	@if (isCreateUnderwriterModalOpen) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+		<div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+			
+			<div class="bg-gray-700 border-l-4 border-[#C2185B] px-6 py-4 flex justify-between items-center text-white">
+				<h3 class="text-xl font-bold">Create Underwriter</h3>
+				<button (click)="closeCreateUnderwriterModal()" class="text-gray-300 hover:text-white transition-colors">
+					<span class="material-icons">close</span>
+				</button>
+			</div>
+
+			<form [formGroup]="createUnderwriterForm" (ngSubmit)="submitCreateUnderwriter()">
+				<div class="p-6">
+					
+					@if (underwriterCreatedUsername) {
+					<div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm text-center">
+						<span class="font-bold">Success!</span> Underwriter <span class="font-bold">{{ underwriterCreatedUsername }}</span> created.
+					</div>
+					}
+					
+					@if (underwriterError) {
+					<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm text-center">
+						{{ underwriterError }}
+					</div>
+					}
+
+					<div class="space-y-4">
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+							<div class="relative">
+								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<span class="material-icons text-gray-400 text-sm">person</span>
+								</div>
+								<input type="text" formControlName="username" class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+							</div>
+							@if (createUnderwriterForm.get('username')?.invalid && createUnderwriterForm.get('username')?.touched) {
+								<span class="text-red-500 text-xs mt-1 block">Username is required (min 3 chars).</span>
+							}
+						</div>
+						
+						<div>
+							<label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+							<div class="relative">
+								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<span class="material-icons text-gray-400 text-sm">lock</span>
+								</div>
+								<input type="password" formControlName="password" class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-[#C2185B] focus:border-[#C2185B] outline-none transition-all">
+							</div>
+							@if (createUnderwriterForm.get('password')?.invalid && createUnderwriterForm.get('password')?.touched) {
+								<span class="text-red-500 text-xs mt-1 block">Password is required (min 6 chars).</span>
+							}
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+					<button type="button" (click)="closeCreateUnderwriterModal()" class="px-5 py-2 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 transition-colors">
+						Close
+					</button>
+					<button type="submit" [disabled]="creatingUnderwriter" class="px-5 py-2 rounded-lg font-semibold text-white bg-[#C2185B] hover:bg-[#A3154D] shadow-md transition-colors disabled:opacity-50">
+						{{ creatingUnderwriter ? 'Creating...' : 'Create Underwriter' }}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	}
+
+</div>

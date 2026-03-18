@@ -1,0 +1,547 @@
+<div class="bg-white min-h-screen pt-20">
+	<div class="max-w-6xl mx-auto px-6 py-12 space-y-8">
+		<div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+<div class="bg-white p-6 rounded-xl shadow border-t-4 border-blue-500">
+<p class="text-gray-500 text-sm">Total Claims</p>
+<p class="text-2xl font-bold">{{ totalClaims }}</p>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow border-t-4 border-yellow-500">
+<p class="text-gray-500 text-sm">Pending</p>
+<p class="text-2xl font-bold">{{ pendingCount }}</p>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-500">
+<p class="text-gray-500 text-sm">Approved</p>
+<p class="text-2xl font-bold">{{ approvedCount }}</p>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow border-t-4 border-red-500">
+<p class="text-gray-500 text-sm">Rejected</p>
+<p class="text-2xl font-bold">{{ rejectedCount }}</p>
+</div>
+<div class="bg-white p-6 rounded-xl shadow border-t-4 border-purple-500">
+  <p class="text-gray-500 text-sm">Commission Earned</p>
+  <p class="text-2xl font-bold">₹{{ commissionEarned }}</p>
+</div>
+
+</div>
+
+<div class="flex space-x-4 mt-6">
+
+<button
+(click)="setTab('pending')"
+[ngClass]="activeTab==='pending' ? 'bg-[#C2185B] text-white' : 'bg-gray-200'"
+class="px-4 py-2 rounded-full font-semibold">
+
+Pending Claims
+
+</button>
+
+<button
+(click)="setTab('history')"
+[ngClass]="activeTab==='history' ? 'bg-[#C2185B] text-white' : 'bg-gray-200'"
+class="px-4 py-2 rounded-full font-semibold">
+
+Claim History
+
+</button>
+
+</div>
+<input
+type="text"
+placeholder="Search claims..."
+[(ngModel)]="searchText"
+(ngModelChange)="applyFilters()"
+class="border px-4 py-2 rounded-lg mt-1 w-full md:w-80">
+
+@if (activeTab === 'history') {
+
+<div class="flex space-x-2 mt-1">
+
+<button
+(click)="statusFilter='ALL'; applyFilters()"
+class="px-3 py-1 rounded-full text-sm border"
+[ngClass]="statusFilter==='ALL' ? 'bg-black text-white' : ''">
+All
+</button>
+
+<button
+(click)="statusFilter='APPROVED'; applyFilters()"
+class="px-3 py-1 rounded-full text-sm border"
+[ngClass]="statusFilter==='APPROVED' ? 'bg-black text-white' : ''">
+Approved
+</button>
+
+<button
+(click)="statusFilter='REJECTED'; applyFilters()"
+class="px-3 py-1 rounded-full text-sm border"
+[ngClass]="statusFilter==='REJECTED' ? 'bg-black text-white' : ''">
+Rejected
+</button>
+
+</div>
+
+}
+		<!-- Loading State -->
+		@if (loading) {
+			<div class="text-center py-12">
+				<p class="text-gray-400">Loading pending claims...</p>
+			</div>
+		}
+
+		<!-- Error State -->
+		@if (error) {
+			<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-center">
+				{{ error }}
+			</div>
+		}
+
+		<!-- No Claims -->
+		@if (!loading && filteredClaims.length === 0) {
+			<div class="text-center py-12">
+				<div class="bg-white p-8 rounded-xl shadow-lg inline-block">
+					<p class="text-black text-lg">No pending claims to review</p>
+				</div>
+			</div>
+		}
+
+		<!-- Claims Table -->
+		@if (!loading && filteredClaims.length > 0){
+			<div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#C2185B]">
+				<div class="overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-black text-white">
+							<tr>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Claim ID</th>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Customer</th>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Type</th>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Policy</th>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Vehicle Year</th>
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Amount</th>
+								   <!-- Risk Score column removed for claim officer -->
+								<th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+								<th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">Actions</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200">
+							@for (claim of filteredClaims; track $index) {
+								<tr class="hover:bg-gray-50 transition-colors duration-150">
+									<td class="px-3 py-4 text-sm max-w-[120px]">
+										<span class="font-semibold text-black">#{{ claim.claimId || claim.id }}</span>
+									</td>
+									<td class="px-3 py-4 text-sm max-w-[150px] break-words">
+										<span class="text-black">{{ claim.customerName || 'N/A' }}</span>
+									</td>
+									<td class="px-3 py-4">
+										<span class="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-600 border border-gray-200">{{ claim.claimType || 'SELF' }}</span>
+									</td>
+									<td class="px-3 py-4 text-sm max-w-[180px] break-words">
+										<span class="text-black">{{ claim.policyName || 'N/A' }}</span>
+									</td>
+									<td class="px-3 py-4 text-sm">
+										<span class="text-black">{{ claim.vehicleYear || 'N/A' }}</span>
+									</td>
+									<td class="px-3 py-4">
+										<span class="font-semibold text-[#C2185B]">₹{{ claim.claimAmount || '-' }}</span>
+									</td>
+									   <!-- Risk Score cell removed for claim officer -->
+									<td class="px-3 py-4">
+										<span class="inline-block px-2 py-1 rounded-full text-[10px] font-semibold tracking-wider font-mono truncate" [ngClass]="getStatusClass(claim.status)">
+											{{ claim.status || 'UNKNOWN' }}
+										</span>
+									</td>
+									<td class="px-3 py-4">
+										<div class="flex justify-center space-x-2 flex-wrap gap-1">
+											<button
+(click)="openClaimDetails(claim)"
+class="bg-black text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-[#C2185B] transition">
+
+View Details
+
+</button>
+											<!-- View Documents Button -->
+											<button
+												(click)="viewDocuments(claim)"
+												class="bg-[#C2185B] text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-black transition">
+												📄 Docs
+											</button>
+
+											<!-- Approve Button -->
+											@if (claim.status?.toUpperCase() === 'PENDING' || claim.status?.toUpperCase() === 'UNDER_REVIEW') {
+												<button
+													(click)="approveClaim(claim.claimId || claim.id || 0)"
+													[disabled]="processingClaimId === (claim.claimId || claim.id)"
+													class="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-700 transition disabled:opacity-50">
+													{{ processingClaimId === (claim.claimId || claim.id) ? '...' : 'Approve' }}
+												</button>
+											}
+											<!-- Reject Button -->
+											@if (claim.status?.toUpperCase() === 'PENDING' || claim.status?.toUpperCase() === 'UNDER_REVIEW') {
+												<button
+													(click)="rejectClaim(claim.claimId || claim.id || 0)"
+													[disabled]="processingClaimId === (claim.claimId || claim.id)"
+													class="border border-red-600 text-red-600 px-3 py-1 rounded-full text-xs font-semibold hover:bg-red-600 hover:text-white transition disabled:opacity-50">
+													{{ processingClaimId === (claim.claimId || claim.id) ? '...' : 'Reject' }}
+												</button>
+											}
+											<!-- Processed indicator -->
+											@if (claim.status?.toUpperCase() === 'APPROVED' || claim.status?.toUpperCase() === 'REJECTED') {
+												<span class="text-gray-500 text-xs">
+													Processed
+												</span>
+											}
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		}
+
+		<!-- Claims Cards (Mobile View Alternative) -->
+		@if (!loading && claims.length > 0) {
+			<div class="md:hidden space-y-4">
+				@for (claim of filteredClaims; track claim.claimId || claim.id){
+					<div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#C2185B] hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+						<div class="flex justify-between items-start mb-4">
+							<div>
+								<p class="font-bold text-lg text-black">Claim #{{ claim.claimId || claim.id }}</p>
+								<p class="text-sm text-gray-600">{{ claim.customerName || 'N/A' }}</p>
+							</div>
+							<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(claim.status)">
+								{{ claim.status || 'UNKNOWN' }}
+							</span>
+						</div>
+						
+						<div class="grid grid-cols-2 gap-3 text-sm mb-4">
+							<div>
+								<p class="text-gray-500 text-xs">Type</p>
+								<p class="font-semibold text-gray-600 mt-0.5"><span class="bg-gray-100 px-2 py-0.5 rounded text-[10px] border border-gray-200">{{ claim.claimType || 'SELF' }}</span></p>
+							</div>
+							<div>
+								<p class="text-gray-500 text-xs">Policy</p>
+								<p class="font-semibold text-black mt-0.5">{{ claim.policyName || 'N/A' }}</p>
+							</div>
+							<div>
+								<p class="text-gray-500 text-xs">Amount</p>
+								<p class="font-semibold text-[#C2185B]">₹{{ claim.claimAmount || '-' }}</p>
+							</div>
+							<div>
+								<p class="text-gray-500 text-xs">Risk Score</p>
+								<p class="font-bold" [ngClass]="getRiskScoreClass(claim.riskScore)">
+									{{ claim.riskScore || '-' }} - {{ getRiskLevel(claim.riskScore) }}
+								</p>
+							</div>
+						</div>
+
+						<div class="flex space-x-2 pt-3 border-t border-gray-200">
+							@if (claim.status?.toUpperCase() === 'PENDING') {
+								<button
+									(click)="reviewClaim(claim.claimId || claim.id || 0)"
+									[disabled]="processingClaimId === (claim.claimId || claim.id)"
+									class="flex-1 bg-black text-white py-2 rounded-full text-sm font-semibold hover:bg-[#C2185B] transition disabled:opacity-50">
+									Review
+								</button>
+							}
+							@if (claim.status?.toUpperCase() === 'PENDING' || claim.status?.toUpperCase() === 'UNDER_REVIEW') {
+								<button
+									(click)="approveClaim(claim.claimId || claim.id || 0)"
+									[disabled]="processingClaimId === (claim.claimId || claim.id)"
+									class="flex-1 bg-green-600 text-white py-2 rounded-full text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50">
+									Approve
+								</button>
+							}
+							@if (claim.status?.toUpperCase() === 'PENDING' || claim.status?.toUpperCase() === 'UNDER_REVIEW') {
+								<button
+									(click)="rejectClaim(claim.claimId || claim.id || 0)"
+									[disabled]="processingClaimId === (claim.claimId || claim.id)"
+									class="flex-1 border border-red-600 text-red-600 py-2 rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white transition disabled:opacity-50">
+									Reject
+								</button>
+							}
+						</div>
+					</div>
+				}
+			</div>
+		}
+	</div>
+</div>
+
+<!-- Document View Modal -->
+@if (showDocumentModal) {
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
+			<!-- Modal Header -->
+			<div class="bg-black text-white px-6 py-4 flex justify-between items-center">
+				<div>
+					<h3 class="text-lg font-bold">Claim Documents</h3>
+					<p class="text-sm text-gray-400">Claim #{{ selectedClaim?.id || selectedClaim?.claimId }} - {{ selectedClaim?.customerName }}</p>
+				</div>
+				<button (click)="closeDocumentModal()" class="text-white hover:text-[#C2185B] text-2xl">&times;</button>
+			</div>
+
+			<!-- Modal Body -->
+			<div class="p-6 overflow-y-auto max-h-[60vh]">
+				<!-- Loading State -->
+				@if (loadingDocuments) {
+					<div class="text-center py-8">
+						<p class="text-gray-500">Loading documents...</p>
+					</div>
+				}
+
+				<!-- No Documents -->
+				@if (!loadingDocuments && documents.length === 0) {
+					<div class="text-center py-8">
+						<div class="text-gray-400 mb-4">
+							<svg class="mx-auto h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+							</svg>
+						</div>
+						<p class="text-gray-500">No documents uploaded for this claim</p>
+					</div>
+				}
+				
+
+				<!-- Documents Grid -->
+				@if (!loadingDocuments && documents.length > 0) {
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						@for (doc of documents; track $index) {
+							<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+								<div class="flex items-start space-x-3">
+									<!-- Document Icon -->
+									<div class="flex-shrink-0">
+										@if (!isImageFile(doc)) {
+											<svg class="h-10 w-10 text-[#C2185B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+											</svg>
+										}
+										@if (isImageFile(doc)) {
+											<svg class="h-10 w-10 text-[#C2185B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+											</svg>
+										}
+									</div>
+									
+									<!-- Document Info -->
+									<div class="flex-1 min-w-0">
+										<p class="text-sm font-semibold text-gray-900 truncate">{{ doc.fileName }}</p>
+										<p class="text-xs text-gray-500">{{ doc.documentType || 'Document' }}</p>
+										@if (doc.uploadDate) {
+											<p class="text-xs text-gray-400 mt-1">{{ doc.uploadDate }}</p>
+										}
+									</div>
+								</div>
+								
+								<!-- Download/View Button -->
+								<div class="mt-3 flex space-x-2">
+									<a 
+										[href]="getDocumentDownloadUrl(doc)" 
+										target="_blank"
+										class="flex-1 bg-[#C2185B] text-white text-center py-2 rounded-lg text-sm font-semibold hover:bg-black transition">
+										View / Download
+									</a>
+								</div>
+							</div>
+						}
+					</div>
+				}
+
+				<!-- Claim Details Section -->
+				<div class="mt-6 pt-6 border-t border-gray-200">
+					<h4 class="font-semibold text-gray-800 mb-3">Claim Details</h4>
+					<div class="grid grid-cols-2 gap-4 text-sm">
+						<div>
+							<span class="text-gray-500">Amount:</span>
+							<span class="ml-2 font-semibold text-[#C2185B]">₹{{ selectedClaim?.claimAmount }}</span>
+						</div>
+						<div>
+							<span class="text-gray-500">Risk Score:</span>
+							<span class="ml-2 font-semibold" [ngClass]="getRiskScoreClass(selectedClaim?.riskScore)">
+								{{ selectedClaim?.riskScore || '-' }} ({{ getRiskLevel(selectedClaim?.riskScore) }})
+							</span>
+						</div>
+						<div class="col-span-2">
+							<span class="text-gray-500">Reason:</span>
+							<p class="mt-1 text-gray-800">{{ selectedClaim?.reason || 'No reason provided' }}</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal Footer -->
+			<div class="bg-gray-100 px-6 py-4 flex justify-end space-x-3">
+				<button 
+					(click)="closeDocumentModal()"
+					class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+					Close
+				</button>
+			</div>
+		</div>
+	</div>
+}
+@if (showDetailsModal) {
+
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+
+<div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+
+<!-- HEADER -->
+
+<div class="bg-black text-white px-6 py-4 flex justify-between items-center">
+
+<h3 class="text-lg font-bold">
+Claim Details
+</h3>
+
+<button
+(click)="closeClaimDetails()"
+class="text-white text-2xl hover:text-[#C2185B]">
+×
+</button>
+
+</div>
+
+
+<!-- BODY -->
+
+<div class="p-8 space-y-6 overflow-y-auto flex-1">
+
+<div class="grid grid-cols-2 gap-4 text-sm">
+
+<div>
+<p class="text-gray-500">Claim ID</p>
+<p class="font-semibold">#{{ selectedClaimDetails?.claimId || selectedClaimDetails?.id }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Customer</p>
+<p class="font-semibold">{{ selectedClaimDetails?.customerName }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Policy</p>
+<p class="font-semibold">{{ selectedClaimDetails?.policyName }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Vehicle Number</p>
+<p class="font-semibold">{{ selectedClaimDetails?.vehicleNumber }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Vehicle Model</p>
+<p class="font-semibold">{{ selectedClaimDetails?.vehicleModel }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Vehicle Year</p>
+<p class="font-semibold">{{ selectedClaimDetails?.vehicleYear }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Claim Amount</p>
+<p class="font-bold text-[#C2185B]">
+₹{{ selectedClaimDetails?.claimAmount }}
+</p>
+</div>
+
+<div>
+<p class="text-gray-500">Risk Score</p>
+<p class="font-bold"
+[ngClass]="getRiskScoreClass(selectedClaimDetails?.riskScore)">
+{{ selectedClaimDetails?.riskScore }}
+</p>
+</div>
+
+</div>
+
+
+<!-- CLAIM REASON -->
+
+<div>
+
+<p class="text-gray-500 text-sm">Claim Reason</p>
+
+<p class="bg-gray-100 p-3 rounded-lg text-sm">
+{{ selectedClaimDetails?.reason }}
+</p>
+
+</div>
+
+
+<!-- THIRD PARTY DETAILS -->
+
+@if (selectedClaimDetails?.claimType === 'THIRD_PARTY') {
+
+<div class="border-t pt-4">
+
+<h4 class="font-bold text-gray-800 mb-3">
+Third Party Details
+</h4>
+
+<div class="grid grid-cols-2 gap-4 text-sm">
+
+<div>
+<p class="text-gray-500">Third Party Name</p>
+<p class="font-semibold">{{ selectedClaimDetails?.thirdPartyName }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Third Party Vehicle</p>
+<p class="font-semibold">{{ selectedClaimDetails?.thirdPartyVehicleNumber }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Injury Type</p>
+<p class="font-semibold">{{ selectedClaimDetails?.injuryType }}</p>
+</div>
+
+<div>
+<p class="text-gray-500">Garage Estimate</p>
+<p class="font-semibold text-[#C2185B]">
+₹{{ selectedClaimDetails?.garageEstimate }}
+</p>
+</div>
+
+</div>
+
+<div class="mt-3">
+
+<p class="text-gray-500 text-sm">Damage Description</p>
+
+<p class="bg-gray-100 p-3 rounded-lg text-sm">
+{{ selectedClaimDetails?.damageDescription || 'Not provided' }}
+</p>
+
+</div>
+
+</div>
+
+}
+
+</div>
+
+
+<!-- FOOTER -->
+
+<div class="bg-gray-100 px-6 py-4 flex justify-end">
+
+<button
+(click)="closeClaimDetails()"
+class="bg-black text-white px-5 py-2 rounded-lg hover:bg-[#C2185B]">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+}

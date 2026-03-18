@@ -1,0 +1,83 @@
+<div class="bg-black flex items-center justify-center min-h-screen pt-20">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+    <!-- HEADER -->
+    <div class="bg-[#C2185B] text-white text-center py-6">
+      <h1 class="text-2xl font-bold tracking-wide">Auto Insurance</h1>
+      <p class="text-sm opacity-90 mt-1">Protect What Moves You</p>
+    </div>
+    <!-- SLIDER TOGGLE -->
+    <div class="flex bg-gray-100 text-black">
+      <a routerLink="/login" class="w-1/2 py-3 font-semibold hover:bg-[#C2185B] hover:text-white transition text-center cursor-pointer"> Login </a>
+      <button class="w-1/2 py-3 font-semibold bg-[#C2185B] text-white"> Register </button>
+    </div>
+    <!-- FORM -->
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="p-8">
+      <!-- Username -->
+      <div class="mb-4">
+        <label class="text-sm font-semibold">Username</label>
+        <input type="text" formControlName="username" placeholder="Enter username" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+          <span class="text-red-600 text-sm">Username is required</span>
+        }
+      </div>
+      <!-- Password -->
+      <div class="mb-4">
+        <label class="text-sm font-semibold">Password</label>
+        <input type="password" formControlName="password" placeholder="Enter password" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+          <span class="text-red-600 text-sm">Password is required</span>
+        }
+      </div>
+      <!-- Email -->
+      <div class="mb-4">
+        <label class="text-sm font-semibold">Email</label>
+        <input type="email" formControlName="email" placeholder="Enter email" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+          <span class="text-red-600 text-sm">
+            @if (registerForm.get('email')?.errors?.['required']) { Email is required }
+            @if (registerForm.get('email')?.errors?.['email']) { Invalid email format }
+          </span>
+        }
+      </div>
+      <!-- Phone -->
+      <div class="mb-6">
+        <label class="text-sm font-semibold">Phone Number</label>
+        <input type="tel" formControlName="phone" placeholder="Enter 10-digit phone number" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
+          <span class="text-red-600 text-sm">
+            @if (registerForm.get('phone')?.errors?.['required']) { Phone number is required }
+            @if (registerForm.get('phone')?.errors?.['pattern']) { Enter a valid 10-digit phone number }
+          </span>
+        }
+      </div>
+      <!-- ROLE SELECTION -->
+      <div class="mb-6">
+        <label class="text-sm font-semibold block mb-3">Select Role</label>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            (click)="setSelectedRole('CUSTOMER')"
+            class="border py-2 rounded transition font-semibold"
+            [ngClass]="selectedRole === 'CUSTOMER' ? 'bg-[#C2185B] text-white border-[#C2185B]' : 'border-black hover:bg-[#C2185B] hover:text-white'"
+          >
+            Customer
+          </button>
+          
+        </div>
+        @if (!selectedRole && registerForm.touched) {
+          <span class="text-red-600 text-sm">Role is required</span>
+        }
+      </div>
+      <!-- BUTTON -->
+      <button 
+        type="submit"
+        [disabled]="isLoading"
+        class="w-full bg-black text-white py-3 rounded font-semibold hover:bg-[#C2185B] transition disabled:opacity-50 disabled:cursor-not-allowed"
+      > 
+        {{ isLoading ? 'Registering...' : 'Continue' }} 
+      </button>
+      <!-- FOOTER TEXT -->
+      <p class="text-center text-sm mt-6"> Already have an account? <a routerLink="/login" class="text-[#C2185B] font-semibold cursor-pointer">Login here</a> </p>
+    </form>
+  </div>
+</div>

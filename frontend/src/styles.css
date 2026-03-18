@@ -1,0 +1,17 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'tailwindcss';
+
+/* Highlight invalid, touched, and submitted form fields with a red border */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched,
+input.ng-invalid.ng-dirty.ng-submitted,
+select.ng-invalid.ng-dirty.ng-submitted,
+textarea.ng-invalid.ng-dirty.ng-submitted {
+	border: 2px solid #e53935 !important;
+}
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

@@ -1,0 +1,219 @@
+<section class="bg-black text-white py-12 min-h-screen pt-24">
+  <div class="max-w-2xl mx-auto px-6">
+    @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-400 text-lg">Loading policy details...</p>
+    </div>
+    }
+
+    @if (!loading && !subscription) {
+    <div class="text-center py-12">
+      <p class="text-red-500 text-lg">Failed to load policy details.</p>
+      <a routerLink="/customer" class="text-[#C2185B] underline mt-4 inline-block hover:text-white">Back to
+        Dashboard</a>
+    </div>
+    }
+
+    @if (!loading && subscription) {
+    <div>
+      <!-- POLICY INFO CARD -->
+      <div class="bg-white text-black p-8 rounded-xl shadow-lg border-t-4 border-[#C2185B] mb-8">
+        <h2 class="text-2xl font-bold mb-4 text-black">File a Claim</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500 text-xs uppercase tracking-wide block">Policy Name</span>
+            <span class="font-semibold text-black">{{ subscription.policy?.name || subscription.policyName || 'Policy'
+              }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-xs uppercase tracking-wide block">Coverage Amount</span>
+            <span class="font-semibold text-[#C2185B]">₹{{ subscription.policy?.coverageAmount ||
+              subscription.coverageAmount || '-' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-xs uppercase tracking-wide block">Policy Status</span>
+            <span class="font-semibold text-[#C2185B]">{{ subscription.status }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500 text-xs uppercase tracking-wide block">Valid Until</span>
+            <span class="font-semibold text-black">{{ subscription.endDate || '-' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLAIM FORM (shown when not yet submitted) -->
+      @if (!showDocumentUpload) {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="bg-white text-black p-8 rounded-xl shadow-lg border-t-4 border-[#C2185B]">
+          <h3 class="text-xl font-bold mb-6 text-black">Claim Details</h3>
+
+          <!-- Claim Type -->
+          <div class="mb-6">
+            <label class="block text-sm text-gray-600 font-semibold mb-2">Claim Type</label>
+            <select formControlName="claimType"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white cursor-pointer"
+              [class.bg-gray-100]="subscription.policy?.policyType === 'THIRD_PARTY'">
+              <option value="SELF" [disabled]="subscription.policy?.policyType === 'THIRD_PARTY'">
+                Self Claim 
+                {{ subscription.policy?.policyType === 'THIRD_PARTY' ? '(Not available for Third-Party policies)' : '' }}
+              </option>
+              <option value="THIRD_PARTY">Third-Party Claim</option>
+            </select>
+            @if (form.get('claimType')?.value === 'THIRD_PARTY') {
+            <p class="text-[#C2185B] font-medium text-xs mt-2">
+              <span class="material-icons text-sm align-middle mr-1">info</span>
+              This claim is for damage or injury caused to a third party.
+            </p>
+            }
+          </div>
+
+          <!-- Claim Amount -->
+          <div class="mb-6">
+            <label class="block text-sm text-gray-600 font-semibold mb-2">Claim Amount (₹)</label>
+            <input type="number" formControlName="claimAmount" min="1" placeholder="Enter the amount you wish to claim"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white" />
+            @if (form.get('claimAmount')?.invalid && form.get('claimAmount')?.touched) {
+            <span class="text-red-600 text-sm mt-1 block">
+              Please enter a valid claim amount (minimum ₹1)
+            </span>
+            }
+          </div>
+
+          <!-- Reason for Claim -->
+          <div class="mb-6">
+            <label class="block text-sm text-gray-600 font-semibold mb-2">Reason for Claim</label>
+            <textarea formControlName="reason" rows="5" placeholder="Please provide the reason for your claim..."
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent resize-none bg-white"></textarea>
+            @if (form.get('reason')?.invalid && form.get('reason')?.touched) {
+            <span class="text-red-600 text-sm mt-1 block">
+              Reason is required (minimum 10 characters)
+            </span>
+            }
+          </div>
+
+          <!-- Third-Party Dynamic Fields -->
+          @if (form.get('claimType')?.value === 'THIRD_PARTY') {
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
+            <h4 class="font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Third-Party Information</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Name -->
+              <div>
+                <label class="block text-sm text-gray-600 font-semibold mb-2">Third Party Name</label>
+                <input type="text" formControlName="thirdPartyName"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white"
+                  placeholder="Enter name">
+                @if (form.get('thirdPartyName')?.invalid && form.get('thirdPartyName')?.touched) {
+                <span class="text-red-600 text-sm mt-1 block">Name is required</span>
+                }
+              </div>
+
+              <!-- Vehicle Number -->
+              <div>
+                <label class="block text-sm text-gray-600 font-semibold mb-2">Third Party Vehicle Number</label>
+                <input type="text" formControlName="thirdPartyVehicleNumber"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white"
+                  placeholder="e.g. MH 12 AB 1234">
+                @if (form.get('thirdPartyVehicleNumber')?.invalid && form.get('thirdPartyVehicleNumber')?.touched) {
+                <span class="text-red-600 text-sm mt-1 block">Vehicle Number is required</span>
+                }
+              </div>
+
+              <!-- Injury Type -->
+              <div>
+                <label class="block text-sm text-gray-600 font-semibold mb-2">Injury Type</label>
+                <select formControlName="injuryType"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white cursor-pointer">
+                  <option value="">Select Injury Type</option>
+                  <option value="MINOR_INJURY">Minor Injury</option>
+                  <option value="SERIOUS_INJURY">Serious Injury</option>
+                  <option value="DEATH">Death</option>
+                  <option value="VEHICLE_DAMAGE">Vehicle Damage</option>
+                </select>
+              </div>
+
+              <!-- Garage Estimate (Conditionally required if injury === VEHICLE_DAMAGE) -->
+              <div>
+                <label class="block text-sm text-gray-600 font-semibold mb-2">Garage Estimate (₹)</label>
+                <input type="number" formControlName="garageEstimate"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent bg-white disabled:bg-gray-200 disabled:cursor-not-allowed"
+                  placeholder="Estimated cost of repairs">
+                @if (form.get('garageEstimate')?.invalid && form.get('garageEstimate')?.touched) {
+                <span class="text-red-600 text-sm mt-1 block">Garage estimate is required for vehicle damage</span>
+                }
+              </div>
+
+              <!-- Damage Description -->
+              <div class="md:col-span-2">
+                <label class="block text-sm text-gray-600 font-semibold mb-2">Damage Description</label>
+                <textarea formControlName="damageDescription" rows="3"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent resize-none bg-white"
+                  placeholder="Describe the damage or injury..."></textarea>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Document Upload Section -->
+          <div class="mb-6">
+            <label class="block text-sm text-gray-600 font-semibold mb-2">Upload Damage Photos / Documents</label>
+            <p class="text-xs text-gray-500 mb-3">Upload photos of the damage or any supporting documents (PDF, JPG,
+              PNG)</p>
+
+            <div
+              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#C2185B] transition-colors">
+              <input type="file" id="damagePhotos" (change)="onDamagePhotoSelected($event)" accept="image/*,.pdf"
+                multiple class="hidden" />
+              <label for="damagePhotos" class="cursor-pointer">
+                <div class="text-gray-500">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M28 8H12a4 4 0 00-4 4v20m0 0v4a4 4 0 004 4h24a4 4 0 004-4V28m-4-4l-8-8-8 8m8-8v20" />
+                  </svg>
+                  <p class="mt-2 text-sm">Click to upload or drag and drop</p>
+                  <p class="text-xs text-gray-400">PNG, JPG, PDF up to 10MB each</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Selected Files Preview -->
+            @if (damagePhotos.length > 0) {
+            <div class="mt-4 space-y-2">
+              <p class="text-sm font-semibold text-gray-700">Selected Files ({{ damagePhotos.length }}):</p>
+              @for (file of damagePhotos; track $index) {
+              <div class="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <svg class="h-6 w-6 text-[#C2185B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span class="text-sm text-gray-700 truncate max-w-xs">{{ file.name }}</span>
+                </div>
+                <button type="button" (click)="removePhoto($index)" class="text-red-500 hover:text-red-700">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+          class="w-full bg-[#C2185B] text-white py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="submitting || subscription.status?.toUpperCase() !== 'APPROVED'">
+          {{ submitting ? 'Submitting Claim…' : 'Submit Claim' }}
+        </button>
+
+        <!-- Back Link -->
+        <div class="text-center mt-4">
+          <a routerLink="/customer" class="text-gray-400 hover:text-white underline">Cancel and go back</a>
+        </div>
+      </form>
+      }
+    </div>
+    }
+  </div>
+</section>

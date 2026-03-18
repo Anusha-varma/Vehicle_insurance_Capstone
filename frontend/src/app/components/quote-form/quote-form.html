@@ -1,0 +1,183 @@
+<section class="bg-black text-white min-h-screen py-12 pt-24">
+  <div class="max-w-3xl mx-auto px-6">
+    <h1 class="text-3xl font-bold text-[#C2185B] mb-8">Policy Application Quote</h1>
+
+    @if (loading) {
+      <div class="text-center py-12">
+        <p class="text-gray-400 text-lg">Loading policy details...</p>
+      </div>
+    }
+
+    @if (!loading && policy) {
+      <div>
+        <!-- POLICY SUMMARY CARD -->
+        <div class="bg-white text-black p-6 rounded-xl shadow-lg border-t-4 border-[#C2185B] mb-8">
+          <h2 class="text-xl font-bold mb-4">{{ policy.name }}</h2>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Policy Type</span>
+              <span class="font-semibold">{{ policy.policyType || '-' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Vehicle Type</span>
+              <span class="font-semibold">{{ policy.vehicleType || '-' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Base Premium</span>
+              <span class="font-semibold">₹{{ policy.basePremium || '-' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Coverage Amount</span>
+              <span class="font-semibold">₹{{ policy.coverageAmount || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUOTE FORM CARD -->
+        <div class="bg-white text-black p-8 rounded-xl shadow-lg border-t-4 border-[#C2185B]">
+          <h3 class="text-xl font-bold mb-6">Enter Vehicle Details</h3>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+            <div>
+              <label class="block text-sm text-gray-700 font-semibold mb-1">Vehicle Number</label>
+              <input
+                type="text"
+                formControlName="vehicleNumber"
+                placeholder="e.g., MH12AB1234"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent"
+              />
+              @if (form.get('vehicleNumber')?.invalid && form.get('vehicleNumber')?.touched) {
+                <span class="text-red-600 text-sm">
+                  Vehicle number is required
+                </span>
+              }
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-700 font-semibold mb-1">Vehicle Model</label>
+              <input
+                type="text"
+                formControlName="vehicleModel"
+                placeholder="e.g., Honda City"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent"
+              />
+              @if (form.get('vehicleModel')?.invalid && form.get('vehicleModel')?.touched) {
+                <span class="text-red-600 text-sm">
+                  Vehicle model is required
+                </span>
+              }
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-700 font-semibold mb-1">Vehicle Year</label>
+              <input
+                type="number"
+                formControlName="vehicleYear"
+                placeholder="e.g., 2022"
+                min="1900"
+                max="2030"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent"
+              />
+              @if (form.get('vehicleYear')?.invalid && form.get('vehicleYear')?.touched) {
+                <span class="text-red-600 text-sm">
+                  Valid vehicle year is required
+                </span>
+              }
+            </div>
+
+            <div>
+              <label class="block text-sm text-gray-700 font-semibold mb-1">City</label>
+              <input
+                type="text"
+                formControlName="city"
+                placeholder="e.g., Mumbai"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C2185B] focus:border-transparent"
+              />
+              @if (form.get('city')?.invalid && form.get('city')?.touched) {
+                <span class="text-red-600 text-sm">
+                  City is required
+                </span>
+              }
+            </div>
+
+
+            <div class="border-t border-gray-200 pt-6 mt-6">
+              <h4 class="text-lg font-bold mb-4 text-[#C2185B]">Upload Required Documents</h4>
+              <p class="text-sm text-gray-500 mb-4">Accepted formats: PDF, JPG, JPEG, PNG</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- RC Document -->
+                <div>
+                  <label class="block text-sm text-gray-700 font-semibold mb-1">RC Document (Vehicle Registration)</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileSelected($event, 'rc')"
+                    class="w-full p-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C2185B] file:text-white hover:file:bg-[#A3154D]"
+                  />
+                  @if (rcFile) {
+                    <p class="text-xs text-green-600 mt-1">Selected: {{ rcFile.name }}</p>
+                  }
+                </div>
+
+                <!-- Driving License -->
+                <div>
+                  <label class="block text-sm text-gray-700 font-semibold mb-1">Driving License</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileSelected($event, 'license')"
+                    class="w-full p-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C2185B] file:text-white hover:file:bg-[#A3154D]"
+                  />
+                  @if (licenseFile) {
+                    <p class="text-xs text-green-600 mt-1">Selected: {{ licenseFile.name }}</p>
+                  }
+                </div>
+
+                <!-- Vehicle Photo -->
+                <div>
+                  <label class="block text-sm text-gray-700 font-semibold mb-1">Vehicle Photo</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileSelected($event, 'vehiclePhoto')"
+                    class="w-full p-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C2185B] file:text-white hover:file:bg-[#A3154D]"
+                  />
+                  @if (vehiclePhotoFile) {
+                    <p class="text-xs text-green-600 mt-1">Selected: {{ vehiclePhotoFile.name }}</p>
+                  }
+                </div>
+
+                <!-- ID Proof -->
+                <div>
+                  <label class="block text-sm text-gray-700 font-semibold mb-1">ID Proof</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileSelected($event, 'idProof')"
+                    class="w-full p-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C2185B] file:text-white hover:file:bg-[#A3154D]"
+                  />
+                  @if (idProofFile) {
+                    <p class="text-xs text-green-600 mt-1">Selected: {{ idProofFile.name }}</p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4">
+              <button
+                type="submit"
+                class="w-full bg-[#C2185B] text-white py-3 rounded-full font-semibold hover:bg-[#A3154D] transition"
+                [disabled]="submitting"
+              >
+                {{ submitting ? 'Submitting...' : 'Submit Application' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    
+  </div>
+</section>

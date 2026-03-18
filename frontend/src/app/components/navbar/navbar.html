@@ -1,0 +1,140 @@
+<!-- NAVBAR -->
+<nav class="bg-black border-b border-[#C2185B] fixed w-full top-0 z-50">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <!-- Brand Logo & Role -->
+    <div class="flex items-center gap-2 cursor-pointer" routerLink="/">
+      <h1 class="text-2xl font-bold tracking-wide text-white">
+        Drive<span class="text-[#C2185B]">Sure</span>
+      </h1>
+      
+      @if (isLoggedIn && userRole) {
+        <span class="material-icons text-gray-500 text-lg translate-y-[1px]">chevron_right</span>
+        <span class="text-[#C2185B] text-sm tracking-[0.25em] font-semibold mb-3 uppercase pt-3">
+          @if (userRole.includes('ADMIN')) {
+            Admin
+          } @else if (userRole.includes('CUSTOMER')) {
+            Customer
+          } @else if (userRole.includes('UNDERWRITER')) {
+            Underwriter
+          } @else if (userRole.includes('CLAIM') || userRole.includes('OFFICER')) {
+            Claim Officer
+          } @else {
+            User
+          }
+        </span>
+      }
+    </div>
+    
+    <!-- Navigation Links -->
+    <div class="flex items-center gap-6 text-sm font-medium">
+      <a routerLink="/" routerLinkActive="!text-[#C2185B]" [routerLinkActiveOptions]="{ exact: true }" class="text-white hover:text-[#C2185B] transition-colors duration-200">Home</a>
+      
+      @if (!isLoggedIn || (!userRole?.includes('CLAIM') && !userRole?.includes('OFFICER'))) {
+        <a routerLink="/policies" routerLinkActive="!text-[#C2185B]" class="text-white hover:text-[#C2185B] transition-colors duration-200">Policies</a>
+      }
+      
+      <!-- Customer Dashboard -->
+      @if (isLoggedIn && userRole?.includes('CUSTOMER')) {
+        <a routerLink="/customer" routerLinkActive="!text-[#C2185B]" class="text-white hover:text-[#C2185B] transition-colors duration-200">Dashboard</a>
+      }
+      
+      <!-- Claim Officer Dashboard -->
+      @if (isLoggedIn && (userRole?.includes('CLAIM') || userRole?.includes('OFFICER'))) {
+        <a routerLink="/claim-officer" routerLinkActive="!text-[#C2185B]" class="text-white hover:text-[#C2185B] transition-colors duration-200">Dashboard</a>
+      }
+      
+
+      <!-- Underwriter Dashboard -->
+      @if (isLoggedIn && userRole?.includes('UNDERWRITER')) {
+        <a routerLink="/underwriter" routerLinkActive="!text-[#C2185B]" class="text-white hover:text-[#C2185B] transition-colors duration-200">Underwriter Dashboard</a>
+      }
+
+      <!-- Admin Links -->
+      @if (isLoggedIn && userRole?.includes('ADMIN')) {
+        <a routerLink="/admin" routerLinkActive="!text-[#C2185B]" [routerLinkActiveOptions]="{ exact: true }" class="text-white hover:text-[#C2185B] transition-colors duration-200">Admin Panel</a>
+      }
+      
+      <!-- Show Login/Register when not logged in -->
+      @if (!isLoggedIn) {
+        <a routerLink="/login" class="text-white border border-[#C2185B] px-5 py-2 rounded-full font-semibold hover:bg-[#C2185B] hover:text-white transition-all duration-200">Login</a>
+        <a routerLink="/register" class="text-white bg-[#C2185B] px-5 py-2 rounded-full font-semibold hover:bg-white hover:text-[#C2185B] transition-all duration-200 shadow-lg shadow-[#C2185B]/20">Register</a>
+      }
+      
+      <!-- Show User Info and Logout when logged in -->
+      @if (isLoggedIn) {
+        <div class="flex items-center gap-4 ml-4 pl-4 border-l border-gray-700">
+          
+          <!-- Notification Bell -->
+          <div class="relative">
+            <button (click)="toggleNotifications($event)" class="relative p-1 text-gray-400 hover:text-white transition-colors duration-200">
+              <span class="material-icons text-[24px]">notifications</span>
+              @if (unreadCount > 0) {
+                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-[5px] py-[2px] text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-[#C2185B] rounded-full">
+                  {{ unreadCount }}
+                </span>
+              }
+            </button>
+
+            <!-- Notification Dropdown -->
+            @if (showNotifications) {
+              <div class="absolute right-0 mt-3 w-80 bg-black border border-[#C2185B]/30 rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md" (click)="$event.stopPropagation()">
+                <div class="px-4 py-3 bg-[#C2185B]/10 border-b border-[#C2185B]/20 flex justify-between items-center">
+                  <h3 class="text-sm font-semibold text-white">Notifications</h3>
+                  @if (unreadCount > 0) {
+                    <span class="text-[10px] bg-[#C2185B] text-white px-2 py-0.5 rounded-full">{{ unreadCount }} New</span>
+                  }
+                </div>
+                
+                <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                  @if (notifications.length > 0) {
+                    @for (notification of notifications; track notification.id) {
+                      <div (click)="markAsRead(notification)" 
+                           class="px-4 py-4 border-b border-gray-800 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+                           [class.bg-[#C2185B]/5]="!notification.isRead">
+                        <div class="flex gap-3">
+                          <div class="flex-shrink-0 mt-1">
+                            <span class="material-icons text-[18px]" [class.text-[#C2185B]]="!notification.isRead" [class.text-gray-500]="notification.isRead">
+                              {{ notification.isRead ? 'notifications_none' : 'notifications_active' }}
+                            </span>
+                          </div>
+                          <div class="flex-grow">
+                            <p class="text-xs text-gray-200 leading-relaxed" [class.font-semibold]="!notification.isRead">
+                              {{ notification.message }}
+                            </p>
+                            <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">
+                              {{ notification.createdAt | date:'shortTime' }} • {{ notification.createdAt | date:'MMM d' }}
+                            </p>
+                          </div>
+                          @if (!notification.isRead) {
+                            <div class="flex-shrink-0">
+                              <div class="w-1.5 h-1.5 bg-[#C2185B] rounded-full mt-2"></div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  } @else {
+                    <div class="px-4 py-10 text-center">
+                      <span class="material-icons text-gray-600 text-[40px] mb-2">notifications_off</span>
+                      <p class="text-sm text-gray-400">No notifications yet</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Profile Avatar & Username -->
+          @if (username) {
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-gray-400 text-[22px]">account_circle</span>
+              <span class="text-xs text-gray-300 font-medium tracking-wide">{{ username }}</span>
+            </div>
+          }
+          
+          <button (click)="logout()" class="text-white border border-[#C2185B] px-5 py-2 rounded-full font-semibold hover:bg-[#C2185B] hover:text-white transition-all duration-200 text-xs">Logout</button>
+        </div>
+      }
+    </div>
+  </div>
+</nav>

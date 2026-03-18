@@ -1,0 +1,78 @@
+<div class="bg-black flex items-center justify-center min-h-screen pt-20">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+    <!-- SLIDER TOGGLE -->
+    <div class="flex bg-gray-100 text-black">
+      <button class="w-1/2 py-3 font-semibold bg-[#C2185B] text-white"> Login </button>
+      <a routerLink="/register" class="w-1/2 py-3 font-semibold hover:bg-[#C2185B] hover:text-white transition text-center flex items-center justify-center cursor-pointer">Register</a>
+    </div>
+    <!-- FORM -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="p-8">
+      <!-- Username -->
+      <div class="mb-4">
+        <label class="text-sm font-semibold">Username</label>
+        <input formControlName="username" type="text" placeholder="Enter username" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+          <span class="text-red-600 text-sm">Username is required</span>
+        }
+      </div>
+      <!-- Password -->
+      <div class="mb-6">
+        <label class="text-sm font-semibold">Password</label>
+        <input formControlName="password" type="password" placeholder="Enter password" class="w-full mt-2 px-4 py-2 border border-black rounded focus:outline-none focus:ring-2 focus:ring-[#C2185B]">
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="text-red-600 text-sm">Password is required</span>
+        }
+      </div>
+      <!-- ROLE SELECTION -->
+      <div class="mb-6">
+        <label class="text-sm font-semibold block mb-3">Select Role</label>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            (click)="setSelectedRole('CUSTOMER')"
+            class="border py-2 rounded transition font-semibold"
+            [ngClass]="selectedRole === 'CUSTOMER' ? 'bg-[#C2185B] text-white border-[#C2185B]' : 'border-black hover:bg-[#C2185B] hover:text-white'"
+          >
+            Customer
+          </button>
+          <button
+            type="button"
+            (click)="setSelectedRole('ADMIN')"
+            class="border py-2 rounded transition font-semibold"
+            [ngClass]="selectedRole === 'ADMIN' ? 'bg-[#C2185B] text-white border-[#C2185B]' : 'border-black hover:bg-[#C2185B] hover:text-white'"
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            (click)="setSelectedRole('CLAIM_OFFICER')"
+            class="border py-2 rounded transition font-semibold"
+            [ngClass]="selectedRole === 'CLAIM_OFFICER' ? 'bg-[#C2185B] text-white border-[#C2185B]' : 'border-black hover:bg-[#C2185B] hover:text-white'"
+          >
+            Claim Officer
+          </button>
+          <button
+            type="button"
+            (click)="setSelectedRole('UNDERWRITER')"
+            class="border py-2 rounded transition font-semibold"
+            [ngClass]="selectedRole === 'UNDERWRITER' ? 'bg-[#C2185B] text-white border-[#C2185B]' : 'border-black hover:bg-[#C2185B] hover:text-white'"
+          >
+            Underwriter
+          </button>
+        </div>
+        @if (loginForm.get('role')?.invalid && loginForm.touched) {
+          <span class="text-red-600 text-sm">Role is required</span>
+        }
+      </div>
+      <!-- BUTTON -->
+      <button 
+        type="submit" 
+        [disabled]="isLoading"
+        class="w-full bg-black text-white py-3 rounded font-semibold hover:bg-[#C2185B] transition disabled:opacity-50 disabled:cursor-not-allowed"
+      > 
+        {{ isLoading ? 'Logging in...' : 'Continue' }} 
+      </button>
+      <!-- FOOTER TEXT -->
+      <p class="text-center text-sm mt-6"> Don't have an account? <a routerLink="/register" class="text-[#C2185B] font-semibold cursor-pointer">Register here</a> </p>
+    </form>
+  
