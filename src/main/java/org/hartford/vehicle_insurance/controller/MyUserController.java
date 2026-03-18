@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin("*")
 public class MyUserController {
 
     private final MyUserService myUserService;
@@ -18,19 +19,27 @@ public class MyUserController {
         this.myUserService = myUserService;
     }
 
-    // ✅ Register
+    // Register
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody MyUser user) {
         MyUser saved = myUserService.register(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // ✅ Login (JWT)
+    // Login (JWT)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody JwtRequest req) {
         try {
             String token = myUserService.login(req.getUsername(), req.getPassword());
-            return ResponseEntity.ok(new JwtResponse(token));
+            // Extract roles from token for response
+            String roles = myUserService
+                .loadUserByUsername(req.getUsername())
+                .getAuthorities()
+                .stream()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .findFirst()
+                .orElse("");
+            return ResponseEntity.ok(new JwtResponse(token, roles));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid credentials");

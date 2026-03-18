@@ -1,9 +1,6 @@
 package org.hartford.vehicle_insurance.model;
 
 import jakarta.persistence.*;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "policies")
@@ -30,15 +27,7 @@ public class Policy {
     private String description;
 
     @Column(nullable = false)
-    private Boolean isActive;
-
-    @ManyToMany
-    @JoinTable(
-        name = "policy_addon",
-        joinColumns = @JoinColumn(name = "policy_id"),
-        inverseJoinColumns = @JoinColumn(name = "addon_id")
-    )
-    private Set<AddOn> addOns = new HashSet<>();
+    private Boolean isActive = true;
 
 //    @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<PolicySubscription> policySubscriptions;
@@ -128,14 +117,6 @@ public class Policy {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
-    }
-
-    public Set<AddOn> getAddOns() {
-        return addOns;
-    }
-
-    public void setAddOns(Set<AddOn> addOns) {
-        this.addOns = addOns;
     }
 
 //    public List<PolicySubscription> getPolicySubscriptions() {

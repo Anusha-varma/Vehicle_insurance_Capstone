@@ -2,8 +2,6 @@ package org.hartford.vehicle_insurance.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "policy_subscriptions")
@@ -15,34 +13,95 @@ public class PolicySubscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "policy_id", nullable = false)
     private Policy policy;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private MyUser myUser;
 
     @Column(nullable = false)
     private LocalDate startDate;
 
+    public Long getUnderwriterId() {
+        return underwriterId;
+    }
+
+    public void setUnderwriterId(Long underwriterId) {
+        this.underwriterId = underwriterId;
+    }
+
+    public Long getClaimOfficerId() {
+        return claimOfficerId;
+    }
+
+    public void setClaimOfficerId(Long claimOfficerId) {
+        this.claimOfficerId = claimOfficerId;
+    }
+
+    private Long underwriterId;
+    private Long claimOfficerId;
     @Column(nullable = false)
     private LocalDate endDate;
 
     @Column(nullable = false)
     private String status;
 
-    @ManyToMany
-    @JoinTable(
-        name = "policy_subscription_addon",
-        joinColumns = @JoinColumn(name = "subscription_id"),
-        inverseJoinColumns = @JoinColumn(name = "addon_id")
-    )
-    private Set<AddOn> selectedAddOns = new HashSet<>();
+    private String vehicleNumber;
 
-    @Transient
+    private String vehicleModel;
+
+    private Integer vehicleYear;
+
+    private Double riskScore;
+
+    @Column(name = "total_premium")
     private Double totalPremium;
 
+    @Column(name="payment_status")
+    private String paymentStatus; // PENDING / PAID
+
+    @Column(name="transaction_id")
+    private String transactionId;
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public Double getUnderwriterCommission() {
+        return underwriterCommission;
+    }
+
+    public void setUnderwriterCommission(Double underwriterCommission) {
+        this.underwriterCommission = underwriterCommission;
+    }
+
+    public Double getClaimOfficerCommission() {
+        return claimOfficerCommission;
+    }
+
+    public void setClaimOfficerCommission(Double claimOfficerCommission) {
+        this.claimOfficerCommission = claimOfficerCommission;
+    }
+
+    @Column(name="underwriter_commission")
+    private Double underwriterCommission=0.0;
+
+    @Column(name="claimofficer_commission")
+    private Double claimOfficerCommission=0.0;
     public PolicySubscription() {
     }
 
@@ -102,23 +161,43 @@ public class PolicySubscription {
         this.status = status;
     }
 
-    public Set<AddOn> getSelectedAddOns() {
-        return selectedAddOns;
-    }
-
-    public void setSelectedAddOns(Set<AddOn> selectedAddOns) {
-        this.selectedAddOns = selectedAddOns;
-    }
-
     public Double getTotalPremium() {
-        if (policy == null) return 0.0;
-        Double addOnTotal = selectedAddOns.stream()
-            .mapToDouble(AddOn::getPrice)
-            .sum();
-        return policy.getBasePremium() + addOnTotal;
+        return totalPremium != null ? totalPremium : 0.0;
     }
 
     public void setTotalPremium(Double totalPremium) {
         this.totalPremium = totalPremium;
+    }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    public void setVehicleNumber(String vehicleNumber) {
+        this.vehicleNumber = vehicleNumber;
+    }
+
+    public String getVehicleModel() {
+        return vehicleModel;
+    }
+
+    public void setVehicleModel(String vehicleModel) {
+        this.vehicleModel = vehicleModel;
+    }
+
+    public Integer getVehicleYear() {
+        return vehicleYear;
+    }
+
+    public void setVehicleYear(Integer vehicleYear) {
+        this.vehicleYear = vehicleYear;
+    }
+
+    public Double getRiskScore() {
+        return riskScore;
+    }
+
+    public void setRiskScore(Double riskScore) {
+        this.riskScore = riskScore;
     }
 }

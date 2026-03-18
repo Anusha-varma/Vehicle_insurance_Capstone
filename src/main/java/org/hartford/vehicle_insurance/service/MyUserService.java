@@ -13,30 +13,38 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Lazy;
+import org.hartford.vehicle_insurance.Repository.PolicySubscriptionRepo;
+import java.util.List;
 
 @Component
 public class MyUserService implements UserDetailsService {
-
-    @Autowired
-    @Lazy
-    private AuthenticationManager authManager;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final PolicySubscriptionRepo policySubscriptionRepo;
+    private final AuthenticationManager authManager;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
     private final MyUserRepo myUserRepo;
 
-    public MyUserService(MyUserRepo myUserRepo) {
+    public MyUserService(
+            @Lazy AuthenticationManager authManager,
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil,
+            MyUserRepo myUserRepo,
+            PolicySubscriptionRepo policySubscriptionRepo) {
+
+        this.authManager = authManager;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
         this.myUserRepo = myUserRepo;
+        this.policySubscriptionRepo = policySubscriptionRepo;
     }
 
     public MyUser register(MyUser myUser) {
         myUser.setId(null);
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
+        if (myUser.getRoles() == null) {
             myUser.setRoles("CUSTOMER");
-
+        }
+        // email and phoneNumber are already set from request body
         return myUserRepo.save(myUser);
     }
 
@@ -44,7 +52,9 @@ public class MyUserService implements UserDetailsService {
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(username, password);
         authManager.authenticate(token);   // now works
-        return jwtUtil.generateToken(username);
+        MyUser user = myUserRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return jwtUtil.generateToken(username, user.getRoles());
     }
 
     @Override
@@ -64,5 +74,30 @@ public class MyUserService implements UserDetailsService {
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
         myUser.setRoles("CLAIM_OFFICER");
         return myUserRepo.save(myUser);
+    }
+    public List<MyUser> getAllUsers() {
+        return myUserRepo.findAll();
+    }
+    public MyUser createUnderwriter(MyUser myUser) {
+        myUser.setId(null);
+        myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
+        myUser.setRoles("UNDERWRITER");
+        return myUserRepo.save(myUser);
+    }
+    public Double getTotalRevenue() {
+        return policySubscriptionRepo.getTotalRevenue();
+    }
+
+    public Double getUnderwriterCommission() {
+        return policySubscriptionRepo.getTotalUnderwriterCommission();
+    }
+
+    public Double getClaimOfficerCommission() {
+        return policySubscriptionRepo.getTotalClaimOfficerCommission();
+    }
+
+    public MyUser findByUsername(String username) {
+        return myUserRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }

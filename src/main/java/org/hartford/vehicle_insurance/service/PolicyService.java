@@ -15,7 +15,10 @@ public class PolicyService {
     }
 
     public Policy createPolicy(Policy policy) {
-        return policyRepo.save(policy);
+
+        if (policy.getIsActive() == null) {
+            policy.setIsActive(true);
+        }return policyRepo.save(policy);
     }
 
     public List<Policy> getAllPolicies() {

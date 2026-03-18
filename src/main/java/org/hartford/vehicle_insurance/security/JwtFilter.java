@@ -35,9 +35,24 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = null;
         String token = null;
 
+        // Check Authorization header first
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtil.extractUsername(token);
+        }
+
+        // Fallback to query parameter for direct browser access (document downloads)
+        if (token == null) {
+            token = request.getParameter("token");
+            if (token != null && !token.isEmpty()) {
+                try {
+                    username = jwtUtil.extractUsername(token);
+                } catch (Exception e) {
+                    // Invalid token in query param, ignore
+                    token = null;
+                    username = null;
+                }
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

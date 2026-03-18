@@ -46,17 +46,21 @@ public class MyUser {
     public MyUser() {
     }
 
-    public MyUser(String username, String roles, String password) {
+    public MyUser(String username, String roles, String password, String email, String phoneNumber) {
         this.username = username;
         this.roles = roles;
         this.password = password;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
-    public MyUser(Long id, String username, String roles, String password) {
+    public MyUser(Long id, String username, String roles, String password, String email, String phoneNumber) {
         this.id = id;
         this.username = username;
         this.roles = roles;
         this.password = password;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
     public void setPassword(String password) {
@@ -67,4 +71,19 @@ public class MyUser {
 
 
     String password;
+    String email;
+    String phoneNumber;
+
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

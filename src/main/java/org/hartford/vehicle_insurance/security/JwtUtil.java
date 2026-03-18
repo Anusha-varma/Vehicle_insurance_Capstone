@@ -15,19 +15,31 @@ public class JwtUtil {
     private final SecretKey key = Keys.hmacShaKeyFor("mySecretKey12345mySecretKey12345".getBytes());
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 5; // 5 hours
 
-    // Generate token
-    public String generateToken(String username) {
+    // Generate token with roles
+    public String generateToken(String username, String roles) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // Backward compatible method (if needed elsewhere)
+    public String generateToken(String username) {
+        return generateToken(username, "");
+    }
+
     // Extract username
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
+    }
+
+    // Extract roles
+    public String extractRoles(String token) {
+        Object roles = extractAllClaims(token).get("roles");
+        return roles != null ? roles.toString() : null;
     }
 
     // Check expiry

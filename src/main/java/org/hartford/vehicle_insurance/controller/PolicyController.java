@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("policy")
+@CrossOrigin("*")
 public class PolicyController {
     private final PolicyService policyService;
 
@@ -28,7 +29,7 @@ public class PolicyController {
         return policyService.getAllPolicies();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     @GetMapping("{id}")
     public Optional<Policy> getPolicyById(@PathVariable Long id) {
         return policyService.getPolicyById(id);
@@ -39,6 +40,7 @@ public class PolicyController {
     public Policy updatePolicy(@PathVariable Long id, @RequestBody Policy policy) {
         return policyService.updatePolicy(id, policy);
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{id}")
